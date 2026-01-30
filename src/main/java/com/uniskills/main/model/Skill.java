@@ -26,7 +26,16 @@ public class Skill {
     private String category;      // programming, design, business, etc.
     private String proficiency;  // Default 3
 
+    // 🔥🔥🔥 FIX FOR AIVEN DATABASE ERROR 🔥🔥🔥
+    // Aiven needs a Primary Key for every table.
+    // Adding @OrderColumn creates a Composite Primary Key (skill_id + tag_order).
     @ElementCollection
+    @CollectionTable(
+            name = "skill_tags",
+            joinColumns = @JoinColumn(name = "skill_id")
+    )
+    @OrderColumn(name = "tag_order") // This is the Magic Fix! 🪄
+    @Column(name = "tag_name")
     private List<String> tags;
 
     private String type;          // TEACH / LEARN
