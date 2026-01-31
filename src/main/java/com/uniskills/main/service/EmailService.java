@@ -16,10 +16,11 @@ public class EmailService {
     public void sendEmail(String toEmail, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("surwasemangesh93@gmail.com"); // तुझा ईमेल इथे खात्री करा
+            message.setFrom("mangeshsurwase7499@gmail.com"); // तुझा ईमेल इथे खात्री करा
             message.setTo(toEmail);
             message.setSubject(subject);
             message.setText(body);
+
             mailSender.send(message);
             System.out.println("Mail sent successfully to " + toEmail);
         } catch (Exception e) {
