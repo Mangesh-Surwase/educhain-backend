@@ -3,7 +3,7 @@ package com.uniskills.main.config;
 import com.uniskills.main.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // 🔥 हे Import महत्वाचे आहे
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -40,13 +40,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 🔥 CORS Active
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 🔥 1. Pre-flight (OPTIONS) requests ना नेहमी allow करा (Fix for 403 on PUT/DELETE)
+                        // 🔥 1. Pre-flight requests (OPTIONS) always allow
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Public URLs
@@ -55,7 +55,7 @@ public class SecurityConfig {
 
                         // Protected URLs
                         .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/skill-requests/**").authenticated() // ही लाईन महत्त्वाची आहे
+                        .requestMatchers("/api/skill-requests/**").authenticated()
                         .requestMatchers("/api/skills/**").authenticated()
                         .requestMatchers("/api/meetings/**").authenticated()
                         .anyRequest().authenticated()
@@ -90,19 +90,25 @@ public class SecurityConfig {
         return (web) -> web.ignoring().requestMatchers("/images/**");
     }
 
+    // 🔥🔥🔥 HE MOST IMPORTANT AAHE (CORS FIX) 🔥🔥🔥
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 🔥 Allow Origin Patterns (Localhost)
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
+        // 1. Allow Origins (Netlify + Localhost)
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",          // Local Vite
+                "http://localhost:3000",          // Local React
+                "https://educhain-platform.netlify.app" // 🔥 TUZHI NETLIFY LINK (Hech missing hote!)
+        ));
 
-        // 🔥 Allow Methods (PUT is crucial here)
+        // 2. Allow Methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // 🔥 Allow Headers
+        // 3. Allow Headers
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
 
+        // 4. Allow Credentials
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
