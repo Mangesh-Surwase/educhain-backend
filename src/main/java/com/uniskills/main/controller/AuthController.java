@@ -29,7 +29,7 @@ public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // --- 1. REGISTER (Updated for Render Safety) ---
+    // --- 1. REGISTER (Updated with Safe Email Handling) ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -46,26 +46,27 @@ public class AuthController {
             user.setOtp(otp);
             user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
-            // 🔥 STEP 1: Save User to Database FIRST
+            // 🔥 STEP 1: Save User FIRST (Database मध्ये Entry फिक्स)
             userRepository.save(user);
 
-            // 🔥 STEP 2: Log OTP to Console (Backup for Render)
+            // 🔥 STEP 2: Log OTP to Console (Backup Plan)
             System.out.println("\n========================================");
             System.out.println("🟢 NEW USER REGISTRATION: " + user.getEmail());
             System.out.println("🔑 YOUR OTP IS: " + otp);
             System.out.println("========================================\n");
 
             // 🔥 STEP 3: Try Sending Email (Safe Mode)
-            // If email fails, we catch the error so Frontend doesn't crash.
             try {
                 emailService.sendEmail(user.getEmail(),
                         "EduChain Verification OTP",
                         "Hello,\n\nYour OTP for registration is: " + otp + "\n\nValid for 10 minutes.");
             } catch (Exception e) {
-                System.err.println("⚠️ Email sending failed (Check Mail Config): " + e.getMessage());
+                // मेल फेल झाला तरी ॲप क्रॅश होणार नाही.
+                System.err.println("⚠️ Email sending failed: " + e.getMessage());
                 System.out.println("✅ But User is Registered! Use OTP from logs above.");
             }
 
+            // Frontend ला नेहमी SUCCESS मेसेज जाईल
             return ResponseEntity.ok("User registered successfully! Check your Email (or if failed, check Server Logs).");
 
         } catch (Exception e) {
@@ -86,7 +87,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP expired.");
         }
 
-        // Trim spaces to avoid errors
         if (user.getOtp().trim().equals(otp.trim())) {
             user.setEnabled(true);
             user.setOtp(null);
@@ -127,7 +127,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // --- 4. FORGOT PASSWORD (Updated) ---
+    // --- 4. FORGOT PASSWORD ---
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -138,22 +138,17 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        // Generate OTP
         String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
         user.setOtp(otp);
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        // 🔥 Log OTP to Console
         System.out.println("\n========================================");
-        System.out.println("🔑 PASSWORD RESET OTP FOR " + email + ": " + otp);
+        System.out.println("🔑 PASSWORD RESET OTP: " + otp);
         System.out.println("========================================\n");
 
-        // Safe Email Sending
         try {
-            emailService.sendEmail(email,
-                    "Reset Password OTP - EduChain",
-                    "Hello " + user.getFirstName() + ",\n\nYour OTP to reset password is: " + otp);
+            emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
         } catch (Exception e) {
             System.err.println("⚠️ Email failed: " + e.getMessage());
         }
