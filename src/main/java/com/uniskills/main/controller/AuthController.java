@@ -3,7 +3,7 @@ package com.uniskills.main.controller;
 import com.uniskills.main.config.JwtUtils;
 import com.uniskills.main.model.User;
 import com.uniskills.main.repository.UserRepository;
-import com.uniskills.main.service.EmailService; // 🔥 New Import
+import com.uniskills.main.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,11 +25,11 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private EmailService emailService; // 🔥 Used EmailService
+    private EmailService emailService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // --- 1. REGISTER ---
+    // --- 1. REGISTER (Updated for Render Safety) ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -46,21 +46,34 @@ public class AuthController {
             user.setOtp(otp);
             user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
+            // 🔥 STEP 1: Save User to Database FIRST
             userRepository.save(user);
 
-            // Send Email using Service
-            emailService.sendEmail(user.getEmail(),
-                    "EduChain Verification OTP",
-                    "Hello,\n\nYour OTP for registration is: " + otp + "\n\nValid for 10 minutes.");
+            // 🔥 STEP 2: Log OTP to Console (Backup for Render)
+            System.out.println("\n========================================");
+            System.out.println("🟢 NEW USER REGISTRATION: " + user.getEmail());
+            System.out.println("🔑 YOUR OTP IS: " + otp);
+            System.out.println("========================================\n");
 
-            return ResponseEntity.ok("User registered successfully! Verify your email.");
+            // 🔥 STEP 3: Try Sending Email (Safe Mode)
+            // If email fails, we catch the error so Frontend doesn't crash.
+            try {
+                emailService.sendEmail(user.getEmail(),
+                        "EduChain Verification OTP",
+                        "Hello,\n\nYour OTP for registration is: " + otp + "\n\nValid for 10 minutes.");
+            } catch (Exception e) {
+                System.err.println("⚠️ Email sending failed (Check Mail Config): " + e.getMessage());
+                System.out.println("✅ But User is Registered! Use OTP from logs above.");
+            }
+
+            return ResponseEntity.ok("User registered successfully! Check your Email (or if failed, check Server Logs).");
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 
-    // --- 2. VERIFY OTP (For Registration) ---
+    // --- 2. VERIFY OTP ---
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -73,7 +86,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP expired.");
         }
 
-        if (user.getOtp().equals(otp)) {
+        // Trim spaces to avoid errors
+        if (user.getOtp().trim().equals(otp.trim())) {
             user.setEnabled(true);
             user.setOtp(null);
             user.setOtpExpiry(null);
@@ -108,14 +122,12 @@ public class AuthController {
         response.put("lastName", user.getLastName());
         response.put("email", user.getEmail());
         response.put("role", user.getRole());
-
-        // 🔥🔥🔥 NEW: Send Profile Image 🔥🔥🔥
         response.put("profileImage", user.getProfileImage());
 
         return ResponseEntity.ok(response);
     }
 
-    // 🔥🔥🔥 4. FORGOT PASSWORD (Send OTP) 🔥🔥🔥
+    // --- 4. FORGOT PASSWORD (Updated) ---
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -132,15 +144,24 @@ public class AuthController {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        // Send Email
-        emailService.sendEmail(email,
-                "Reset Password OTP - EduChain",
-                "Hello " + user.getFirstName() + ",\n\nYour OTP to reset password is: " + otp + "\n\nDo not share this with anyone.");
+        // 🔥 Log OTP to Console
+        System.out.println("\n========================================");
+        System.out.println("🔑 PASSWORD RESET OTP FOR " + email + ": " + otp);
+        System.out.println("========================================\n");
 
-        return ResponseEntity.ok("OTP sent to your email.");
+        // Safe Email Sending
+        try {
+            emailService.sendEmail(email,
+                    "Reset Password OTP - EduChain",
+                    "Hello " + user.getFirstName() + ",\n\nYour OTP to reset password is: " + otp);
+        } catch (Exception e) {
+            System.err.println("⚠️ Email failed: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok("OTP sent to your email (or check logs).");
     }
 
-    // 🔥🔥🔥 5. RESET PASSWORD (Verify OTP & Update Password) 🔥🔥🔥
+    // --- 5. RESET PASSWORD ---
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -152,7 +173,6 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        // Validate OTP
         if (user.getOtp() == null || !user.getOtp().equals(otp)) {
             return ResponseEntity.badRequest().body("Invalid OTP");
         }
@@ -161,9 +181,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP Expired");
         }
 
-        // Update Password
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setOtp(null);       // Clear OTP
+        user.setOtp(null);
         user.setOtpExpiry(null);
         userRepository.save(user);
 
