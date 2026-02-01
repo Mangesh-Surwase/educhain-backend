@@ -10,8 +10,9 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    // हे फक्त Login ID वाचण्यासाठी आहे (याचा वापर setFrom साठी करू नको)
     @Value("${spring.mail.username:unknown}")
-    private String senderEmail;
+    private String brevoLoginId;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -21,24 +22,24 @@ public class EmailService {
         try {
             System.out.println("--- EMAIL DEBUG ---");
             System.out.println("To: " + toEmail);
-
-            if ("unknown".equals(senderEmail)) {
-                System.out.println("Sender email property missing. Skipping email.");
-                return;
-            }
+            System.out.println("Using Brevo Account: " + brevoLoginId); // फक्त Debug साठी
 
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(senderEmail);
+
+            // 🔥🔥🔥 सर्वात महत्त्वाचा बदल (MOST IMPORTANT FIX) 🔥🔥🔥
+            // Login ID वापरू नकोस, तुझा Verified Gmail वापर!
+            message.setFrom("mangeshsurwase7499@gmail.com");
+
             message.setTo(toEmail);
             message.setSubject(subject);
             message.setText(body);
 
             mailSender.send(message);
-            System.out.println("Email sent successfully.");
+            System.out.println("✅ Email sent successfully!");
 
         } catch (Exception e) {
-            System.err.println("Email failed: " + e.getMessage());
-            // We do NOT throw exception here, so the main thread continues.
+            System.err.println("❌ Email failed: " + e.getMessage());
+            // ॲप क्रॅश होऊ नये म्हणून Exception इथेच पकडलं आहे.
         }
     }
 }
