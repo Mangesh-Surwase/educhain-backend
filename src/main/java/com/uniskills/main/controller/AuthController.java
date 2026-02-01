@@ -29,7 +29,7 @@ public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // --- 1. REGISTER (Updated with Safe Email Handling) ---
+    // --- 1. REGISTER ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -41,33 +41,21 @@ public class AuthController {
             user.setRole(user.getRole() != null ? user.getRole() : "LEARNER");
             user.setEnabled(false);
 
-            // OTP Generation
             String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
             user.setOtp(otp);
             user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
-            // 🔥 STEP 1: Save User FIRST (Database मध्ये Entry फिक्स)
-            userRepository.save(user);
+            // CRITICAL FIX: Use saveAndFlush to force DB commit immediately
+            userRepository.saveAndFlush(user);
 
-            // 🔥 STEP 2: Log OTP to Console (Backup Plan)
-            System.out.println("\n========================================");
-            System.out.println("🟢 NEW USER REGISTRATION: " + user.getEmail());
-            System.out.println("🔑 YOUR OTP IS: " + otp);
-            System.out.println("========================================\n");
+            System.out.println("USER REGISTERED: " + user.getEmail() + " | OTP: " + otp);
 
-            // 🔥 STEP 3: Try Sending Email (Safe Mode)
-            try {
-                emailService.sendEmail(user.getEmail(),
-                        "EduChain Verification OTP",
-                        "Hello,\n\nYour OTP for registration is: " + otp + "\n\nValid for 10 minutes.");
-            } catch (Exception e) {
-                // मेल फेल झाला तरी ॲप क्रॅश होणार नाही.
-                System.err.println("⚠️ Email sending failed: " + e.getMessage());
-                System.out.println("✅ But User is Registered! Use OTP from logs above.");
-            }
+            // CRITICAL FIX: Send email in a separate thread so it does not block or rollback registration
+            new Thread(() -> {
+                emailService.sendEmail(user.getEmail(), "EduChain Verification OTP", "Your OTP is: " + otp);
+            }).start();
 
-            // Frontend ला नेहमी SUCCESS मेसेज जाईल
-            return ResponseEntity.ok("User registered successfully! Check your Email (or if failed, check Server Logs).");
+            return ResponseEntity.ok("User registered successfully. Check email or logs for OTP.");
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
@@ -133,27 +121,22 @@ public class AuthController {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User with this email does not exist.");
+            return ResponseEntity.badRequest().body("User not found");
         }
 
         User user = userOpt.get();
-
         String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
         user.setOtp(otp);
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
-        System.out.println("\n========================================");
-        System.out.println("🔑 PASSWORD RESET OTP: " + otp);
-        System.out.println("========================================\n");
+        System.out.println("RESET OTP: " + otp);
 
-        try {
+        new Thread(() -> {
             emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
-        } catch (Exception e) {
-            System.err.println("⚠️ Email failed: " + e.getMessage());
-        }
+        }).start();
 
-        return ResponseEntity.ok("OTP sent to your email (or check logs).");
+        return ResponseEntity.ok("OTP sent.");
     }
 
     // --- 5. RESET PASSWORD ---
@@ -181,6 +164,6 @@ public class AuthController {
         user.setOtpExpiry(null);
         userRepository.save(user);
 
-        return ResponseEntity.ok("Password changed successfully! Login with new password.");
+        return ResponseEntity.ok("Password changed successfully!");
     }
 }
