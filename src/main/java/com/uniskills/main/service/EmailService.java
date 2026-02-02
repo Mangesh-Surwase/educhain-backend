@@ -15,7 +15,7 @@ import java.util.Map;
 public class EmailService {
 
     // 🔥🔥🔥 डायरेक्ट Key इथेच टाकली आहे (Properties file चा घोळ नको) 🔥🔥🔥
-    private final String apiKey = "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";
+    private final String apiKey = "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";
 
     private final String brevoApiUrl = "https://api.brevo.com/v3/smtp/email";
 
@@ -53,6 +53,11 @@ public class EmailService {
             // 3. Send
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            System.out.println(payload);
+            System.out.println(apiKey);
+            System.out.println(headers);
+
+
 
             ResponseEntity<String> response = restTemplate.postForEntity(brevoApiUrl, request, String.class);
 
