@@ -33,16 +33,15 @@ public class User {
     @Column(name = "user_role", nullable = false)
     private String role;
 
-    // --- ✅ Profile Fields ---
     @Column(length = 500)
     private String bio;
 
     @Column(length = 100000)
     private String profileImage;
-    // ------------------------
 
+    // CHANGED: Default is now false. User must verify OTP to become true.
     @Column(nullable = false)
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     private String otp;
 

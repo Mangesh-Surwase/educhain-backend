@@ -39,23 +39,23 @@ public class AuthController {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(user.getRole() != null ? user.getRole() : "LEARNER");
+
+            // STRICTLY SETTING ENABLED TO FALSE
             user.setEnabled(false);
 
             String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
             user.setOtp(otp);
             user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
-            // CRITICAL FIX: Use saveAndFlush to force DB commit immediately
             userRepository.saveAndFlush(user);
 
-            System.out.println("USER REGISTERED: " + user.getEmail() + " | OTP: " + otp);
+            System.out.println("USER SAVED (INACTIVE): " + user.getEmail());
 
-            // CRITICAL FIX: Send email in a separate thread so it does not block or rollback registration
             new Thread(() -> {
                 emailService.sendEmail(user.getEmail(), "EduChain Verification OTP", "Your OTP is: " + otp);
             }).start();
 
-            return ResponseEntity.ok("User registered successfully. Check email or logs for OTP.");
+            return ResponseEntity.ok("User registered successfully. Please verify OTP to login.");
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
@@ -75,12 +75,15 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP expired.");
         }
 
-        if (user.getOtp().trim().equals(otp.trim())) {
+        if (user.getOtp() != null && user.getOtp().trim().equals(otp.trim())) {
+
+            // ACTIVATING USER NOW
             user.setEnabled(true);
             user.setOtp(null);
             user.setOtpExpiry(null);
             userRepository.save(user);
-            return ResponseEntity.ok("Verified! You can now login.");
+
+            return ResponseEntity.ok("Verified! Your account is now active.");
         } else {
             return ResponseEntity.badRequest().body("Invalid OTP");
         }
@@ -97,8 +100,9 @@ public class AuthController {
 
         User user = userOpt.get();
 
+        // STRICT CHECK: User cannot login if enabled is false
         if (!user.isEnabled()) {
-            return ResponseEntity.status(403).body("Email not verified.");
+            return ResponseEntity.status(403).body("Email not verified. Please verify OTP first.");
         }
 
         String token = jwtUtils.generateToken(user.getEmail());
@@ -129,8 +133,6 @@ public class AuthController {
         user.setOtp(otp);
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
-
-        System.out.println("RESET OTP: " + otp);
 
         new Thread(() -> {
             emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
