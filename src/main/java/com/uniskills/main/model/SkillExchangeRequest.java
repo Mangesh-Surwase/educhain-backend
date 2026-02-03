@@ -31,7 +31,7 @@ public class SkillExchangeRequest {
     private User requester;
 
     @Column(nullable = false)
-    private String status; // PENDING, ACCEPTED, REJECTED
+    private String status;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

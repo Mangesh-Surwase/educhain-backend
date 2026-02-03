@@ -17,7 +17,6 @@ public interface SkillExchangeRequestRepository extends JpaRepository<SkillExcha
 
     void deleteBySkill_Id(Long skillId);
 
-    // 🔥🔥🔥 NEW: Dashboard साठी
-    // मला आलेल्या (Received) आणि अजूनही 'PENDING' असलेल्या रिक्वेस्ट मोजणे.
+
     long countBySkill_UserAndStatus(User user, String status);
 }

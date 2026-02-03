@@ -13,6 +13,6 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     List<Skill> findByCategory(String category);
     List<Skill> findByTitleContainingIgnoreCaseAndType(String title, String type);
 
-    // 🔥🔥🔥 NEW: Dashboard साठी (Total Skills Posted)
+
     long countByUser(User user);
 }

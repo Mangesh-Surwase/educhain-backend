@@ -19,19 +19,13 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     void deleteBySkill_Id(Long skillId);
 
-    // Rating Calculation साठी
+
     List<Meeting> findByMentor_IdAndStatus(Long mentorId, String status);
 
-    // 🔥🔥🔥 NEW: For Dashboard Stats (Count Total Completed Sessions)
-    // जिथे यूजर Mentor किंवा Learner आहे आणि स्टेटस COMPLETED आहे
+
     long countByMentorOrLearnerAndStatus(User mentor, User learner, String status);
 
-    // 🔥🔥🔥 NEW: For Next Upcoming Meeting
-    // ही Query अशा मिटिंग शोधेल ज्या:
-    // 1. यूजर Mentor किंवा Learner आहे.
-    // 2. स्टेटस 'SCHEDULED' आहे.
-    // 3. तारीख आजच्या नंतरची आहे (Future).
-    // 4. सर्वात जवळची तारीख पहिली येईल (ASC Order).
+
     @Query("SELECT m FROM Meeting m WHERE (m.mentor = :user OR m.learner = :user) AND m.status = 'SCHEDULED' AND m.scheduledDate > :now ORDER BY m.scheduledDate ASC")
     List<Meeting> findUpcomingMeetings(User user, LocalDateTime now);
 }

@@ -20,12 +20,12 @@ public class UserService {
         this.meetingRepository = meetingRepository;
     }
 
-    // ✅ 1. Get User Profile (With Rating Calculation)
+    //  1. Get User Profile (With Rating Calculation)
     public UserDto getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥🔥🔥 RATING CALCULATION START 🔥🔥🔥
+        //  RATING CALCULATION START
         List<Meeting> completedMeetings = meetingRepository.findByMentor_IdAndStatus(userId, "COMPLETED");
 
         double totalRating = 0;
@@ -43,7 +43,7 @@ public class UserService {
             averageRating = totalRating / reviewCount;
             averageRating = Math.round(averageRating * 10.0) / 10.0;
         }
-        // 🔥🔥🔥 RATING CALCULATION END 🔥🔥🔥
+        //  RATING CALCULATION END
 
         return UserDto.builder()
                 .id(user.getId())
@@ -53,13 +53,13 @@ public class UserService {
                 .role(user.getRole())
                 .bio(user.getBio())
                 .profileImage(user.getProfileImage())
-                // .credits(user.getCredits()) ❌ REMOVED
-                .averageRating(averageRating) // ✅ ADDED
-                .totalReviews(reviewCount)    // ✅ ADDED
+
+                .averageRating(averageRating)
+                .totalReviews(reviewCount)
                 .build();
     }
 
-    // ✅ 2. Update Profile
+    //  2. Update Profile
     public UserDto updateProfile(Long userId, UserDto req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

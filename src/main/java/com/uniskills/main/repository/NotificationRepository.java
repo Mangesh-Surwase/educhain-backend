@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    // यूजरचे सर्व नोटिफिकेशन्स (नवीन वरती)
+
     List<Notification> findByRecipientOrderByCreatedAtDesc(User recipient);
 
-    // फक्त न वाचलेले (Unread) मोजण्यासाठी (Optional Badge Count)
+
     long countByRecipientAndIsReadFalse(User recipient);
 }

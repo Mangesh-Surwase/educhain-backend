@@ -11,12 +11,12 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long meetingId; // कोणत्या मीटिंगसाठी
-    private Long learnerId; // कोणी दिला
-    private Long mentorId;  // कोणाला दिला
+    private Long meetingId;
+    private Long learnerId;
+    private Long mentorId;
 
-    private int rating;     // 1 to 5 Stars
-    private String comment; // Review msg
+    private int rating;
+    private String comment;
 
     private LocalDateTime timestamp;
 

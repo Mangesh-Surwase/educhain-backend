@@ -25,14 +25,14 @@ public class SkillExchangeRequestController {
         this.userRepository = userRepository;
     }
 
-    // Helper: Get Current User ID
+
     private Long getCurrentUserId(Authentication authentication) {
         String email = authentication.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found")).getId();
     }
 
-    // ✅ 1. SEND REQUEST
+
     @PostMapping("/{skillId}")
     public ResponseEntity<?> requestSkill(
             @PathVariable Long skillId,
@@ -48,8 +48,7 @@ public class SkillExchangeRequestController {
         }
     }
 
-    // ✅ 2. UPDATE STATUS (Accept/Reject)
-    // Frontend वरून { "status": "ACCEPTED" } असे JSON पाठवा
+
     @PutMapping("/{requestId}")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long requestId,
@@ -59,13 +58,13 @@ public class SkillExchangeRequestController {
         return ResponseEntity.ok(requestService.updateStatus(requestId, status));
     }
 
-    // ✅ 3. GET SENT REQUESTS (Outbox)
+
     @GetMapping("/sent")
     public List<SkillExchangeRequest> getSentRequests(Authentication authentication) {
         return requestService.getMySentRequests(getCurrentUserId(authentication));
     }
 
-    // ✅ 4. GET RECEIVED REQUESTS (Inbox)
+
     @GetMapping("/received")
     public List<SkillExchangeRequest> getReceivedRequests(Authentication authentication) {
         return requestService.getMyReceivedRequests(getCurrentUserId(authentication));

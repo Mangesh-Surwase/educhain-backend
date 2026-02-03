@@ -20,13 +20,13 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String message; // "Sanket sent you a request"
+    private String message;
 
-    private boolean isRead = false; // वाचले की नाही?
+    private boolean isRead = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "user_id") // कोणाला नोटिफिकेशन द्यायचं?
+    @JoinColumn(name = "user_id")
     private User recipient;
 }

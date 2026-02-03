@@ -21,24 +21,22 @@ public class Skill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;         // Frontend title
+    private String title;
     private String description;
-    private String category;      // programming, design, business, etc.
-    private String proficiency;  // Default 3
+    private String category;
+    private String proficiency;
 
-    // 🔥🔥🔥 FIX FOR AIVEN DATABASE ERROR 🔥🔥🔥
-    // Aiven needs a Primary Key for every table.
-    // Adding @OrderColumn creates a Composite Primary Key (skill_id + tag_order).
+
     @ElementCollection
     @CollectionTable(
             name = "skill_tags",
             joinColumns = @JoinColumn(name = "skill_id")
     )
-    @OrderColumn(name = "tag_order") // This is the Magic Fix! 🪄
+    @OrderColumn(name = "tag_order")
     @Column(name = "tag_name")
     private List<String> tags;
 
-    private String type;          // TEACH / LEARN
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

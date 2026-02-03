@@ -39,7 +39,7 @@ public class User {
     @Column(length = 100000)
     private String profileImage;
 
-    // CHANGED: Default is now false. User must verify OTP to become true.
+
     @Column(nullable = false)
     private boolean enabled = false;
 

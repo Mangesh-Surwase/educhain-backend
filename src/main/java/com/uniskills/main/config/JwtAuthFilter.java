@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String token;
         final String email;
 
-        // 1. Token नसेल तर सरळ पुढे जाऊ द्या (Login/Register साठी)
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -43,14 +43,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         token = authHeader.substring(7);
 
-        // 2. 🔥 Safe Parsing: Try-Catch वापरा जेणेकरून Token चुकीचा असेल तरी 403 येऊ नये
+
         try {
-            email = jwtUtils.extractEmail(token); // इथे Error येऊ शकतो
+            email = jwtUtils.extractEmail(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
-                if (jwtUtils.isTokenValid(token)) { // किंवा validateToken
+                if (jwtUtils.isTokenValid(token)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -61,11 +61,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // 🔥 Error आला तरी प्रिंट करा पण रिक्वेस्ट अडवू नका!
+
             System.out.println("⚠️ JWT Filter Error (Ignoring): " + e.getMessage());
         }
 
-        // 3. नेहमी पुढे जा
+
         filterChain.doFilter(request, response);
     }
 }

@@ -22,7 +22,6 @@ public class SkillDto {
     private String type; // TEACH or LEARN
     private LocalDateTime createdAt;
 
-    // 🔥 आपण इथे 'User' ऐवजी 'UserDto' वापरत आहोत
-    // कारण UserDto मध्ये आपण 'averageRating' आणि 'totalReviews' भरले आहेत.
+
     private UserDto user;
 }

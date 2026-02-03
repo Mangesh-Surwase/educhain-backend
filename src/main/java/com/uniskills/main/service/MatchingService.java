@@ -25,7 +25,7 @@ public class MatchingService {
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Get skills the current user wants to LEARN
+
         List<Skill> learnSkills = skillRepository.findByUser(currentUser)
                 .stream()
                 .filter(skill -> skill.getType().equalsIgnoreCase("LEARN"))
@@ -34,7 +34,7 @@ public class MatchingService {
         List<MatchResponse> matches = new ArrayList<>();
 
         for (Skill learnSkill : learnSkills) {
-            // Find others who TEACH that same skill
+
             List<Skill> teachingSkills = skillRepository.findByType("TEACH");
             for (Skill teachSkill : teachingSkills) {
                 if (teachSkill.getTitle().equalsIgnoreCase(learnSkill.getTitle())

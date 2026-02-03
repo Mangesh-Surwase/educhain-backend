@@ -19,7 +19,7 @@ public class NotificationService {
         this.userRepository = userRepository;
     }
 
-    // ✅ SEND NOTIFICATION (Internal Use)
+    //  SEND NOTIFICATION (Internal Use)
     public void sendNotification(User recipient, String message) {
         Notification notification = new Notification();
         notification.setRecipient(recipient);
@@ -28,20 +28,20 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // ✅ GET MY NOTIFICATIONS
+    //  GET MY NOTIFICATIONS
     public List<Notification> getUserNotifications(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         return notificationRepository.findByRecipientOrderByCreatedAtDesc(user);
     }
 
-    // ✅ MARK AS READ
+    // MARK AS READ
     public void markAsRead(Long notificationId) {
         Notification n = notificationRepository.findById(notificationId).orElseThrow();
         n.setRead(true);
         notificationRepository.save(n);
     }
 
-    // ✅ UNREAD COUNT
+    //  UNREAD COUNT
     public long getUnreadCount(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         return notificationRepository.countByRecipientAndIsReadFalse(user);

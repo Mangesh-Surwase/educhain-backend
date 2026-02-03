@@ -15,8 +15,7 @@ public class Meeting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔥🔥 NEW: Link Meeting to Request (Foreign Key)
-    // एका Request साठी एक किंवा अनेक मीटिंग्स असू शकतात, पण सोपे ठेवण्यासाठी OneToOne ठेवू
+
     @OneToOne
     @JoinColumn(name = "request_id")
     private SkillExchangeRequest request;

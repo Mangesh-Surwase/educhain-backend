@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Setter
 public class MeetingRequest {
 
-    // 🔥 फक्त Request ID पुरेसा आहे, बाकी आपण शोधू
+
     private Long requestId;
 
     private String title;

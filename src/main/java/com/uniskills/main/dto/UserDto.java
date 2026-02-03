@@ -21,7 +21,7 @@ public class UserDto {
     private String bio;
     private String profileImage;
 
-    // --- 🔥 ✅ Reputation System Fields ---
+    // Reputation System Fields ---
     private Double averageRating; // उदा. 4.8
     private Integer totalReviews; // उदा. 15 Reviews
 }

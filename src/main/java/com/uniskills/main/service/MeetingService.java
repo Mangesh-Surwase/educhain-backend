@@ -19,20 +19,20 @@ public class MeetingService {
     private final SkillExchangeRequestRepository requestRepository;
     private final UserRepository userRepository;
 
-    // 🔥 New Dependency
+    // New Dependency
     private final NotificationService notificationService;
 
     public MeetingService(MeetingRepository meetingRepository,
                           SkillExchangeRequestRepository requestRepository,
                           UserRepository userRepository,
-                          NotificationService notificationService) { // 🔥 Inject
+                          NotificationService notificationService) {
         this.meetingRepository = meetingRepository;
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
     }
 
-    // ✅ CREATE OR UPDATE MEETING
+    // CREATE OR UPDATE MEETING
     public Meeting createMeeting(MeetingRequest req, String userEmail) {
 
         User currentUser = userRepository.findByEmail(userEmail)
@@ -45,7 +45,7 @@ public class MeetingService {
             throw new RuntimeException("Cannot schedule meeting. Request is not ACCEPTED.");
         }
 
-        // 🔥 SMART MENTOR LOGIC
+        //  SMART MENTOR LOGIC
         User mentor;
         User learner;
         String skillType = request.getSkill().getType();
@@ -65,7 +65,7 @@ public class MeetingService {
         Optional<Meeting> existingMeeting = meetingRepository.findByRequest_Id(req.getRequestId());
 
         Meeting meeting;
-        boolean isReschedule = false; // To change notification message
+        boolean isReschedule = false;
 
         if (existingMeeting.isPresent()) {
             meeting = existingMeeting.get();
@@ -87,7 +87,7 @@ public class MeetingService {
 
         Meeting savedMeeting = meetingRepository.save(meeting);
 
-        // 🔥🔥🔥 TRIGGER NOTIFICATION (For BOTH Mentor & Learner) 🔥🔥🔥
+
         String action = isReschedule ? "rescheduled" : "scheduled";
         String dateStr = req.getScheduledDate().toString().replace("T", " at ");
 
@@ -102,7 +102,7 @@ public class MeetingService {
         return savedMeeting;
     }
 
-    // ✅ GET USER MEETINGS
+    //  GET USER MEETINGS
     public List<Meeting> getUserMeetings(Long userId) {
         return meetingRepository.findAll().stream()
                 .filter(m -> m.getMentor().getId().equals(userId) || m.getLearner().getId().equals(userId))
@@ -121,7 +121,7 @@ public class MeetingService {
         return meetingRepository.save(m);
     }
 
-    // 🔥 COMPLETE MEETING
+    //  COMPLETE MEETING
     public Meeting completeMeeting(Long id, Integer rating, String feedback, String userEmail) {
         Meeting m = getMeetingById(id);
         User currentUser = userRepository.findByEmail(userEmail)
@@ -141,7 +141,7 @@ public class MeetingService {
 
         Meeting savedMeeting = meetingRepository.save(m);
 
-        // 🔥🔥🔥 TRIGGER NOTIFICATION (Notify Mentor about Feedback) 🔥🔥🔥
+
         String msg = "Your session for '" + m.getSkill().getTitle() + "' was marked complete! You got " + rating + " Stars ⭐";
         notificationService.sendNotification(m.getMentor(), msg);
 

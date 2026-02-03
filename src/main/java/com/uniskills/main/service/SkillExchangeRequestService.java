@@ -17,21 +17,21 @@ public class SkillExchangeRequestService {
     private final SkillExchangeRequestRepository requestRepository;
     private final UserRepository userRepository;
 
-    // 🔥 New Dependency
+    //  New Dependency
     private final NotificationService notificationService;
 
     public SkillExchangeRequestService(
             SkillRepository skillRepository,
             SkillExchangeRequestRepository requestRepository,
             UserRepository userRepository,
-            NotificationService notificationService) { // 🔥 Inject
+            NotificationService notificationService) {
         this.skillRepository = skillRepository;
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
     }
 
-    // ✅ 1. CREATE REQUEST
+    //  1. CREATE REQUEST
     public SkillExchangeRequest createRequest(Long skillId, User requester) {
 
         Skill skill = skillRepository.findById(skillId)
@@ -52,15 +52,15 @@ public class SkillExchangeRequestService {
 
         SkillExchangeRequest savedRequest = requestRepository.save(request);
 
-        // 🔥🔥🔥 TRIGGER NOTIFICATION 🔥🔥🔥
-        // ज्याची स्किल आहे, त्याला सांगा की रिक्वेस्ट आली आहे.
+        // TRIGGER NOTIFICATION
+
         String msg = "New request from " + requester.getFirstName() + " for your skill: " + skill.getTitle();
         notificationService.sendNotification(skill.getUser(), msg);
 
         return savedRequest;
     }
 
-    // ✅ 2. UPDATE STATUS
+    // 2. UPDATE STATUS
     public SkillExchangeRequest updateStatus(Long requestId, String status) {
         SkillExchangeRequest req = requestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
@@ -68,22 +68,22 @@ public class SkillExchangeRequestService {
         req.setStatus(status.toUpperCase());
         SkillExchangeRequest savedReq = requestRepository.save(req);
 
-        // 🔥🔥🔥 TRIGGER NOTIFICATION 🔥🔥🔥
-        // ज्याने रिक्वेस्ट पाठवली होती (Requester), त्याला सांगा काय झालं.
+        //  TRIGGER NOTIFICATION
+
         String msg = "Your request for " + req.getSkill().getTitle() + " has been " + status.toUpperCase();
         notificationService.sendNotification(req.getRequester(), msg);
 
         return savedReq;
     }
 
-    // ✅ 3. GET SENT REQUESTS
+    //  3. GET SENT REQUESTS
     public List<SkillExchangeRequest> getMySentRequests(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return requestRepository.findByRequester(user);
     }
 
-    // ✅ 4. GET RECEIVED REQUESTS
+    //  4. GET RECEIVED REQUESTS
     public List<SkillExchangeRequest> getMyReceivedRequests(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

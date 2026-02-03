@@ -4,10 +4,10 @@ public class FeedbackDTO {
 
     private Long meetingId;
     private Long learnerId;
-    private int rating;     // 1 to 5
+    private int rating;
     private String comment;
 
-    // Getters and Setters
+
     public Long getMeetingId() { return meetingId; }
     public void setMeetingId(Long meetingId) { this.meetingId = meetingId; }
 

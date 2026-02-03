@@ -5,7 +5,7 @@ import com.uniskills.main.model.Meeting;
 import com.uniskills.main.service.MeetingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication; // 🔥 Import
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,11 +22,11 @@ public class MeetingController {
         this.meetingService = meetingService;
     }
 
-    // ✅ 1. Create / Reschedule (Only Mentor)
+
     @PostMapping
     public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest, Authentication authentication) {
         try {
-            // 🔥 User Email Service ला पाठवला जातोय
+
             String email = authentication.getName();
             Meeting meeting = meetingService.createMeeting(meetingRequest, email);
 
@@ -41,19 +41,19 @@ public class MeetingController {
         }
     }
 
-    // ✅ 2. Get Meetings
+
     @GetMapping("/user/{userId}")
     public List<Meeting> getUserMeetings(@PathVariable Long userId) {
         return meetingService.getUserMeetings(userId);
     }
 
-    // ✅ 3. Update Status (Simple)
+
     @PutMapping("/{id}/status")
     public Meeting updateMeetingStatus(@PathVariable Long id, @RequestParam String status) {
         return meetingService.updateMeetingStatus(id, status);
     }
 
-    // ✅ 4. Complete Meeting (Only Learner)
+
     @PutMapping("/{id}/complete")
     public ResponseEntity<?> completeMeeting(
             @PathVariable Long id,
@@ -66,13 +66,12 @@ public class MeetingController {
 
             return ResponseEntity.ok(meetingService.completeMeeting(id, rating, feedback, email));
         } catch (Exception e) {
-            // जर Mentor ने try केला तर इथे Error येईल
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ✅ 5. Reschedule (Explicit - Only Mentor)
-    // टीप: createMeeting मध्ये Reschedule logic ऑलरेडी आहे, पण हे वेगळं Endpoint हवं असेल तर:
+
     @PutMapping("/{id}/reschedule")
     public ResponseEntity<?> rescheduleMeeting(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {

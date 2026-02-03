@@ -100,7 +100,7 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        // STRICT CHECK: User cannot login if enabled is false
+
         if (!user.isEnabled()) {
             return ResponseEntity.status(403).body("Email not verified. Please verify OTP first.");
         }
@@ -119,7 +119,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // --- 4. FORGOT PASSWORD ---
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -141,7 +141,7 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent.");
     }
 
-    // --- 5. RESET PASSWORD ---
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");

@@ -34,7 +34,7 @@ public class SkillService {
         this.meetingRepository = meetingRepository;
     }
 
-    // ✅ ADD SKILL
+    // ADD SKILL
     public Skill addSkill(CreateSkillRequest req, User user) {
         Skill skill = new Skill();
         skill.setTitle(req.getTitle());
@@ -47,19 +47,19 @@ public class SkillService {
         return skillRepository.save(skill);
     }
 
-    // ✅ GET SKILLS BY USER
+    //  GET SKILLS BY USER
     public List<Skill> getUserSkills(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return skillRepository.findByUser(user);
     }
 
-    // ✅ GET ALL SKILLS
+    // GET ALL SKILLS
     public List<Skill> getAllSkills() {
         return skillRepository.findAll();
     }
 
-    // ✅ DELETE SKILL (With Cleanup)
+    // DELETE SKILL (With Cleanup)
     @Transactional
     public void deleteSkill(Long id) {
         meetingRepository.deleteBySkill_Id(id);
@@ -67,7 +67,7 @@ public class SkillService {
         skillRepository.deleteById(id);
     }
 
-    // ✅ UPDATE SKILL
+    //  UPDATE SKILL
     public Skill updateSkill(Long id, CreateSkillRequest req) {
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
@@ -80,7 +80,7 @@ public class SkillService {
         return skillRepository.save(skill);
     }
 
-    // ✅ BASIC SEARCH
+    //  BASIC SEARCH
     public List<Skill> searchSkills(String title, String type, String category) {
         if (title != null && !title.isEmpty()) {
             return skillRepository.findByTitleContainingIgnoreCase(title);

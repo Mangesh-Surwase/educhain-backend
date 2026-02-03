@@ -90,7 +90,7 @@ public class SecurityConfig {
         return (web) -> web.ignoring().requestMatchers("/images/**");
     }
 
-    // 🔥🔥🔥 HE MOST IMPORTANT AAHE (CORS FIX) 🔥🔥🔥
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -99,7 +99,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",          // Local Vite
                 "http://localhost:3000",          // Local React
-                "https://educhain-platform.netlify.app" // 🔥 TUZHI NETLIFY LINK (Hech missing hote!)
+                "https://educhain-platform.netlify.app"
         ));
 
         // 2. Allow Methods
